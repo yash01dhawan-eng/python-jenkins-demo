@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        PYTHON_VERSION = '3.9'
+        PYTHON_VERSION = '3.12'
     }
     
 
@@ -12,15 +12,15 @@ pipeline {
         stage('Setup Python') {
             steps {
                 echo "Setting up Python environment..."
-                bat 'python3 --version'
-                bat 'pip3 --version'
+                bat 'python --version'
+                bat 'pip --version'
             }
         }
         
         stage('Install Dependencies') {
             steps {
                 echo "Installing Python dependencies..."
-                bat 'pip3 install -r requirements.txt'
+                bat 'pip install -r requirements.txt'
             }
         }
         
@@ -28,21 +28,21 @@ pipeline {
         stage('Run Application') {
             steps {
                 echo "Running the application..."
-                bat 'python3 app.py'
+                bat 'python app.py'
             }
         }
         
         stage('Run Tests') {
             steps {
                 echo "Running unit tests..."
-                bat 'python3 -m pytest test_app.py -v --tb=short'
+                bat 'python -m pytest test_app.py -v --tb=short'
             }
         }
         
         stage('Test Coverage') {
             steps {
                 echo "Generating test coverage report..."
-                bat 'python3 -m pytest test_app.py --cov=app --cov-report=term-missing || true'
+                bat 'python -m pytest test_app.py --cov=app --cov-report=term-missing || true'
             }
         }
         
