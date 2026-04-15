@@ -7,9 +7,21 @@ pipeline {
 
     stages {
 
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yash01dhawan-eng/python-jenkins-demo.git'
+            }
+        }
+
+        stage('Debug Workspace') {
+            steps {
+                bat 'dir'
+            }
+        }
+
         stage('Setup Python') {
             steps {
-                echo "Setting up Python environment..."
+                echo "Checking Python..."
                 bat '%PYTHON% --version'
                 bat '%PYTHON% -m pip --version'
             }
@@ -17,41 +29,47 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo "Installing Python dependencies..."
-                bat '%PYTHON% -m pip install -r requirements.txt'
+                echo "Installing dependencies..."
+                bat '''
+                    if exist requirements.txt (
+                        %PYTHON% -m pip install -r requirements.txt
+                    ) else (
+                        echo requirements.txt NOT FOUND
+                        exit 1
+                    )
+                '''
             }
         }
 
         stage('Run Application') {
             steps {
-                echo "Running the application..."
+                echo "Running app..."
                 bat '%PYTHON% app.py'
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo "Running unit tests..."
+                echo "Running tests..."
                 bat '%PYTHON% -m pytest test_app.py -v --tb=short'
             }
         }
 
         stage('Test Coverage') {
             steps {
-                echo "Generating test coverage report..."
+                echo "Coverage report..."
                 bat '%PYTHON% -m pytest test_app.py --cov=app --cov-report=term-missing || exit 0'
             }
         }
 
         stage('Build Artifacts') {
             steps {
-                echo "Creating build artifacts..."
+                echo "Creating artifacts..."
                 bat '''
                     if not exist dist mkdir dist
                     copy app.py dist\\
                     copy test_app.py dist\\
                     copy requirements.txt dist\\
-                    echo Artifacts ready in dist directory
                 '''
             }
         }
@@ -59,14 +77,14 @@ pipeline {
 
     post {
         always {
-            echo "Cleaning up workspace..."
+            echo "Cleaning workspace..."
             cleanWs()
         }
         success {
-            echo "Pipeline executed successfully!"
+            echo "Pipeline SUCCESS 🎉"
         }
         failure {
-            echo "Pipeline failed! Check logs above."
+            echo "Pipeline FAILED ❌ check logs"
         }
     }
 }
